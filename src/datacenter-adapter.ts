@@ -13,7 +13,8 @@ import {
   InlineCommentData,
   MergeOptions,
   Commit,
-  CommitListResult
+  CommitListResult,
+  DiffStatListResult
 } from './adapter-types.js';
 import { PULL_REQUEST_STATE_MAP } from './field-mappings.js';
 import winston from 'winston';
@@ -464,5 +465,87 @@ export class DataCenterAdapter implements BitbucketAdapter {
     );
 
     return this.normalizeCommitList(response.data);
+  }
+
+  async getPullRequestDiffStat(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<DiffStatListResult> {
+    const [project, repo] = this.parseRepoSlug(repoSlug);
+    const params = this.buildPaginationParams(options);
+
+    const response = await this.api.get(
+      `/rest/api/1.0/projects/${project}/repos/${repo}/pull-requests/${prId}/diff`,
+      { params }
+    );
+
+    const diffData = response.data;
+    const diffStats = [];
+
+    for (const diff of diffData.diffs || []) {
+      const stat: any = {
+        type: 'diffstat',
+        status: diff.type || 'MODIFIED',
+        lines_removed: 0,
+        lines_added: 0
+      };
+
+      if (diff.source) {
+        stat.old = {
+          path: diff.source.toString || '',
+          type: 'commit_file'
+        };
+      } else {
+        stat.old = null;
+      }
+
+      if (diff.destination) {
+        stat.new = {
+          path: diff.destination.toString || '',
+          type: 'commit_file'
+        };
+      } else {
+        stat.new = null;
+      }
+
+      for (const hunk of diff.hunks || []) {
+        for (const segment of hunk.segments || []) {
+          if (segment.type === 'REMOVED') {
+            stat.lines_removed += segment.lines?.length || 0;
+          } else if (segment.type === 'ADDED') {
+            stat.lines_added += segment.lines?.length || 0;
+          }
+        }
+      }
+
+      diffStats.push(stat);
+    }
+
+    return {
+      values: diffStats,
+      size: diffStats.length,
+      page: 1,
+      pagelen: diffStats.length
+    };
+  }
+
+  async getPullRequestPatch(
+    workspace: string,
+    repoSlug: string,
+    prId: string
+  ): Promise<string> {
+    const [project, repo] = this.parseRepoSlug(repoSlug);
+
+    const response = await this.api.get(
+      `/rest/api/1.0/projects/${project}/repos/${repo}/pull-requests/${prId}.diff`,
+      {
+        headers: { Accept: 'text/plain' },
+        responseType: 'text'
+      }
+    );
+
+    return response.data;
   }
 }

@@ -118,6 +118,25 @@ export interface CommitListResult extends PaginationResult {
   values: Commit[];
 }
 
+export interface DiffStat {
+  type?: string;
+  status?: string;
+  lines_removed?: number;
+  lines_added?: number;
+  old?: {
+    path?: string;
+    type?: string;
+  } | null;
+  new?: {
+    path?: string;
+    type?: string;
+  } | null;
+}
+
+export interface DiffStatListResult extends PaginationResult {
+  values: DiffStat[];
+}
+
 export interface BitbucketAdapter {
   listRepositories(
     workspace: string,
@@ -192,4 +211,17 @@ export interface BitbucketAdapter {
     prId: string,
     options?: MergeOptions
   ): Promise<PullRequest>;
+
+  getPullRequestDiffStat(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<DiffStatListResult>;
+
+  getPullRequestPatch(
+    workspace: string,
+    repoSlug: string,
+    prId: string
+  ): Promise<string>;
 }

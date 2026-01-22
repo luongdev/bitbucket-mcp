@@ -4421,14 +4421,11 @@ class BitbucketServer {
         all,
       });
 
-      const result = await this.paginator.fetchValues(
-        `/repositories/${workspace}/${repo_slug}/pullrequests/${pull_request_id}/diffstat`,
-        {
-          pagelen,
-          page,
-          all,
-          description: "getPullRequestDiffStat",
-        }
+      const result = await this.adapter.getPullRequestDiffStat(
+        workspace,
+        repo_slug,
+        pull_request_id,
+        { pagelen, page, all }
       );
 
       return {
@@ -4463,16 +4460,13 @@ class BitbucketServer {
         pull_request_id,
       });
 
-      const response = await this.api.get(
-        `/repositories/${workspace}/${repo_slug}/pullrequests/${pull_request_id}/patch`,
-        {
-          headers: { Accept: "text/plain" },
-          responseType: "text",
-          maxRedirects: 5,
-        }
+      const patchData = await this.adapter.getPullRequestPatch(
+        workspace,
+        repo_slug,
+        pull_request_id
       );
 
-      return { content: [{ type: "text", text: response.data }] };
+      return { content: [{ type: "text", text: patchData }] };
     } catch (error) {
       logger.error("Error getting pull request patch", {
         error,
