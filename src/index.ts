@@ -2606,14 +2606,11 @@ class BitbucketServer {
         all,
       });
 
-      const result = await this.paginator.fetchValues(
-        `/repositories/${workspace}/${repo_slug}/pullrequests/${pull_request_id}/activity`,
-        {
-          pagelen,
-          page,
-          all,
-          description: "getPullRequestActivity",
-        }
+      const result = await this.adapter.getPullRequestActivity(
+        workspace,
+        repo_slug,
+        pull_request_id,
+        { pagelen, page, all }
       );
 
       return {
@@ -4500,14 +4497,11 @@ class BitbucketServer {
         all,
       });
 
-      const result = await this.paginator.fetchValues(
-        `/repositories/${workspace}/${repo_slug}/pullrequests/${pull_request_id}/tasks`,
-        {
-          pagelen,
-          page,
-          all,
-          description: "getPullRequestTasks",
-        }
+      const result = await this.adapter.getPullRequestTasks(
+        workspace,
+        repo_slug,
+        pull_request_id,
+        { pagelen, page, all }
       );
 
       return {

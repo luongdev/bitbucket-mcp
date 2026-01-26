@@ -224,4 +224,18 @@ export interface BitbucketAdapter {
     repoSlug: string,
     prId: string
   ): Promise<string>;
+
+  getPullRequestActivity(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any>;
+
+  getPullRequestTasks(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any>;
 }

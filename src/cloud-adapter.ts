@@ -293,4 +293,42 @@ export class CloudAdapter implements BitbucketAdapter {
 
     return response.data;
   }
+
+  async getPullRequestActivity(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any> {
+    const result = await this.paginator.fetchValues(
+      `/repositories/${workspace}/${repoSlug}/pullrequests/${prId}/activity`,
+      {
+        pagelen: options?.pagelen ?? options?.limit,
+        page: options?.page,
+        all: options?.all,
+        description: 'getPullRequestActivity'
+      }
+    );
+
+    return result;
+  }
+
+  async getPullRequestTasks(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any> {
+    const result = await this.paginator.fetchValues(
+      `/repositories/${workspace}/${repoSlug}/pullrequests/${prId}/tasks`,
+      {
+        pagelen: options?.pagelen ?? options?.limit,
+        page: options?.page,
+        all: options?.all,
+        description: 'getPullRequestTasks'
+      }
+    );
+
+    return result;
+  }
 }

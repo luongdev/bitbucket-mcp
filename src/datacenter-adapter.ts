@@ -548,4 +548,50 @@ export class DataCenterAdapter implements BitbucketAdapter {
 
     return response.data;
   }
+
+  async getPullRequestActivity(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any> {
+    const [project, repo] = this.parseRepoSlug(repoSlug);
+    const params = this.buildPaginationParams(options);
+
+    const response = await this.api.get(
+      `/rest/api/1.0/projects/${project}/repos/${repo}/pull-requests/${prId}/activities`,
+      { params }
+    );
+
+    return {
+      values: response.data.values || [],
+      size: response.data.size,
+      page: response.data.start ? Math.floor(response.data.start / (response.data.limit || 25)) + 1 : 1,
+      pagelen: response.data.limit,
+      next: response.data.isLastPage ? undefined : 'next-page'
+    };
+  }
+
+  async getPullRequestTasks(
+    workspace: string,
+    repoSlug: string,
+    prId: string,
+    options?: PaginationOptions
+  ): Promise<any> {
+    const [project, repo] = this.parseRepoSlug(repoSlug);
+    const params = this.buildPaginationParams(options);
+
+    const response = await this.api.get(
+      `/rest/api/1.0/projects/${project}/repos/${repo}/pull-requests/${prId}/tasks`,
+      { params }
+    );
+
+    return {
+      values: response.data.values || [],
+      size: response.data.size,
+      page: response.data.start ? Math.floor(response.data.start / (response.data.limit || 25)) + 1 : 1,
+      pagelen: response.data.limit,
+      next: response.data.isLastPage ? undefined : 'next-page'
+    };
+  }
 }
